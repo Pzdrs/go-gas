@@ -20,13 +20,12 @@ func (vs *vehicleSpawner) Stop() {
 }
 
 type vehicleSpawner struct {
-	config config.VehicleSpawnerConfiguration
+	config config.VehicleSpawnerConfig
 	ticker *time.Ticker
 }
 
-func NewVehicleSpawner(configuration config.VehicleSpawnerConfiguration) Spawner {
+func NewVehicleSpawner(configuration config.VehicleSpawnerConfig) Spawner {
 	return &vehicleSpawner{
 		config: configuration,
-		ticker: time.NewTicker(time.Duration(configuration.SpawnInterval) * time.Millisecond),
 	}
 }

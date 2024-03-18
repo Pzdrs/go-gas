@@ -1,23 +1,31 @@
-vehicle-spawn-rate: 5000 # spawn rate in milliseconds
+vehicle-spawn-rate: [5000] # spawn rate in milliseconds
 vehicle-spawn-amount: [1] # amount of vehicles to spawn
 
 pumps:
   # pump-id:
-  #   name: "Pump Name" (optional)
   #   type: "electric | gas | diesel | hydrogen" (required)
   #   amount: 1 (required)
   #   speed: [1000, 5000] # random speed between 1-5s (single value or range) (required)
   regular_charger:
-    name: "EV Car Charger"
     type: electric
     amount: 4
-    speed:
-      - 1000
-      - 5000
-  supercharger:
-    name: "Supercharger"
-    type: electric
+    speed: [1000,5000]
+  regular_diesel:
+    type: diesel
     amount: 2
-    speed: 1000
+    speed: [1000,3000]
+  regular_gas:
+    type: gas
+    amount: 4
+    speed: [1000,3000]
+  regular_lpg:
+    type: lpg
+    amount: 2
+    speed: [1000,3000]
+
+registers:
+  amount: 2
+  speed: [100,500]
+
 
 
