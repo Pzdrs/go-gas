@@ -1,31 +1,43 @@
 package main
 
 import (
-	"github.com/Pzdrs/go-gas/internal/config"
-	"time"
+	"github.com/Pzdrs/go-gas/config"
+	"sync"
 )
 
-var station_types = []string{"gas", "diesel", "electric", "lpg"}
+var pumpWg sync.WaitGroup
+var registerWg sync.WaitGroup
+var finishWg sync.WaitGroup
 
-type Pump struct {
-	occupied bool
-}
-
-type Line struct {
-	fuelType string
-	pumps    []Pump
-}
-
-type Vehicle struct {
-}
-
-func (pump *Pump) Fill(vehicle *Vehicle) {
-	pump.occupied = true
-	time.Sleep(1 * time.Second)
-	pump.occupied = false
-}
+var gasStation GasStation
 
 func main() {
 	config.LoadConfig()
 
+	gasStation = NewGasStation()
+	gasStation.Inspect()
+
+	finishWg.Add(1)
+	go spawnVehicles()
+
+	for _, pump := range gasStation.Pumps {
+		go handlePump(pump)
+	}
+
+	for _, register := range gasStation.Registers {
+		go handleRegister(register)
+	}
+
+	go findPump(gasStation.Pumps)
+	go findRegister(gasStation.Registers)
+
+	go aggregate(gasStation.ExitQueue)
+
+	pumpWg.Wait()
+	close(gasStation.PaymentQueue)
+
+	registerWg.Wait()
+	close(gasStation.ExitQueue)
+
+	finishWg.Wait()
 }

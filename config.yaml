@@ -1,5 +1,6 @@
-vehicle-spawn-rate: [5000] # spawn rate in milliseconds
-vehicle-spawn-amount: [1] # amount of vehicles to spawn
+vehicle-spawner:
+  rate: [ 10ms,20ms ] # spawn rate in milliseconds
+  goal: 1000
 
 pumps:
   # pump-id:
@@ -7,25 +8,29 @@ pumps:
   #   amount: 1 (required)
   #   speed: [1000, 5000] # random speed between 1-5s (single value or range) (required)
   regular_charger:
+    name: Regular Charger
     type: electric
-    amount: 4
-    speed: [1000,5000]
+    amount: 1
+    speed: [100ms,200ms]
   regular_diesel:
+    name: Regular Diesel
     type: diesel
-    amount: 2
-    speed: [1000,3000]
+    amount: 1
+    speed: [10ms,50ms]
   regular_gas:
+    name: Regular Gas
     type: gas
-    amount: 4
-    speed: [1000,3000]
+    amount: 1
+    speed: [10ms,50ms]
   regular_lpg:
+    name: Regular LPG
     type: lpg
-    amount: 2
-    speed: [1000,3000]
+    amount: 1
+    speed: [15ms,30ms]
 
 registers:
-  amount: 2
-  speed: [100,500]
+  amount: 1
+  speed: [1000ms,2000ms]
 
 
 
