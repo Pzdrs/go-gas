@@ -6,12 +6,13 @@ import (
 )
 
 func main() {
-	config.LoadConfig("config.dev.yaml")
+	config.LoadConfig("config.yaml")
+
 	gasStation := gasstation.NewGasStation(config.GasStationConfiguration)
 
 	gasStation.Inspect()
 
 	gasStation.Setup()
 
-	gasStation.Begin(100)
+	gasStation.Begin(10)
 }

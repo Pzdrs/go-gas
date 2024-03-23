@@ -1,3 +1,9 @@
+influx:
+  url: https://influx.pycrs.cz
+  token: "redacted"
+  org: Homelab
+  bucket: go-gas
+
 vehicle-spawner:
   rate: [ 0ms ] # spawn rate in milliseconds
   goal: 1000

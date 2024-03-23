@@ -7,12 +7,6 @@ func (p *pump) Handle(vehicle *vehicle, station *GasStation) {
 	time.Sleep(randomDuration(p.Speed))
 	//fmt.Println("vehicle ", vehicle.ID, "is done filling up")
 	p.Occupied = false
-
-	station.CollectMetric(func() {
-		vehiclesFilledUpMutex.Lock()
-		vehiclesFilledUp++
-		vehiclesFilledUpMutex.Unlock()
-	})
 }
 
 func pumpRoutine(line *line, pump *pump, vehicle *vehicle, station *GasStation) {

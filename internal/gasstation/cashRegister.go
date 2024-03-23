@@ -11,12 +11,9 @@ func (reg *cashRegister) Close() {
 
 func (reg *cashRegister) Serve(vehicle *vehicle, station *GasStation) {
 	//fmt.Println("Register ", reg.ID, "received vehicle: ", vehicle.ID)
-	time.Sleep(randomDuration(reg.Speed))
-	station.CollectMetric(func() {
-		vehiclesPaidMutex.Lock()
-		vehiclesPaid++
-		vehiclesPaidMutex.Unlock()
-	})
+	duration := randomDuration(reg.Speed)
+
+	time.Sleep(duration)
 	//fmt.Println("Register ", reg.ID, "is done processing vehicle: ", vehicle.ID)
 	station.Exit <- vehicle
 }

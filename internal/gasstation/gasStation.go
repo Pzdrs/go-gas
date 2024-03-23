@@ -1,28 +1,33 @@
 package gasstation
 
 import (
+	"context"
 	"fmt"
 	"github.com/Pzdrs/go-gas/internal/config"
+	"github.com/google/uuid"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
+	"log"
 	"math/rand/v2"
 	"sync"
 	"time"
 )
 
-var vehiclesLeftMutex = sync.Mutex{}
-var vehiclesLeft = 0
+var influxClient influxdb2.Client
 
-var vehiclesPaidMutex = sync.Mutex{}
-var vehiclesPaid = 0
-
-var vehiclesFilledUpMutex = sync.Mutex{}
-var vehiclesFilledUp = 0
-
-func (s *GasStation) CollectMetric(metric func()) {
+func (s *GasStation) CollectMetric(getDataPoint func() *write.Point) {
 	s.StatsWg.Add(1)
-	go func() {
+	go func(client influxdb2.Client) {
 		defer s.StatsWg.Done()
-		metric()
-	}()
+		//point := getDataPoint()
+		point := influxdb2.NewPoint("register-serving", map[string]string{"simulation": s.SimulationID.String()}, map[string]interface{}{"duration": 0}, time.Now())
+
+		writeAPI := client.WriteAPIBlocking("Homelab", "go-gas")
+		if err := writeAPI.WritePoint(context.Background(), point); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Metric written")
+	}(influxClient)
 }
 
 func (s *GasStation) Setup() {
@@ -62,7 +67,7 @@ func (s *GasStation) Begin(vehicleGoal int) {
 	}
 	s.SimulationRunning = true
 
-	fmt.Println("Starting the simulation")
+	fmt.Println("Starting simulation", s.SimulationID)
 	startTime := time.Now()
 
 	go s.spawnVehicles(vehicleGoal)
@@ -72,22 +77,21 @@ func (s *GasStation) Begin(vehicleGoal int) {
 	// All lines are done => all pumps are done => all vehicles are in register queues and no more vehicles are coming
 	s.closeRegisters()
 
-	//fmt.Println("All lines are done")
+	fmt.Println("All lines are done")
 
 	s.RegistersWg.Wait()
-	//fmt.Println("All registers are done")
+	fmt.Println("All registers are done")
 
 	s.StatsWg.Wait()
-	//fmt.Println("All stats are logged")
+	fmt.Println("All stats are logged")
 
 	// All vehicles are fueled up and paid up and heading out => no more vehicles will be coming through the exit
 	s.closeExit()
-	//fmt.Println("The exit is closed")
+	fmt.Println("The exit is closed")
 
-	fmt.Println(vehiclesLeft)
-	fmt.Println(vehiclesPaid)
-	fmt.Println(vehiclesFilledUp)
 	fmt.Println("The simulation took:", time.Since(startTime))
+
+	influxClient.Close()
 
 	s.SimulationRunning = false
 	s.SimulationComplete = true
@@ -116,12 +120,6 @@ func (s *GasStation) spawnVehicles(goal int) {
 func (s *GasStation) exitHandler() {
 	for vehicle := range s.Exit {
 		_ = vehicle
-		s.CollectMetric(func() {
-			fmt.Println("increment")
-			vehiclesLeftMutex.Lock()
-			vehiclesLeft++
-			vehiclesLeftMutex.Unlock()
-		})
 		//fmt.Println(" --- vehicle ", vehicle.ID, "is leaving the gas station")
 	}
 }
@@ -144,12 +142,13 @@ func (s *GasStation) closeExit() {
 
 func NewGasStation(configuration config.GasStationConfig) *GasStation {
 	return &GasStation{
-		Lines:       constructLines(config.GasStationConfiguration.Pumps),
-		LinesWg:     sync.WaitGroup{},
-		Registers:   constructRegisters(configuration.Registers),
-		RegistersWg: sync.WaitGroup{},
-		StatsWg:     sync.WaitGroup{},
-		Exit:        make(chan *vehicle),
+		SimulationID: uuid.New(),
+		Lines:        constructLines(config.GasStationConfiguration.Pumps),
+		LinesWg:      sync.WaitGroup{},
+		Registers:    constructRegisters(configuration.Registers),
+		RegistersWg:  sync.WaitGroup{},
+		StatsWg:      sync.WaitGroup{},
+		Exit:         make(chan *vehicle),
 	}
 }
 

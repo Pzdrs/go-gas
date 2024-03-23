@@ -1,6 +1,8 @@
 package gasstation
 
 import (
+	"github.com/google/uuid"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"sync"
 	"time"
 )
@@ -19,6 +21,10 @@ var fuelTypes = []fuelType{
 }
 
 type GasStation struct {
+	SimulationID uuid.UUID
+
+	InfluxClient influxdb2.Client
+
 	SimulationRunning  bool
 	SimulationComplete bool
 
