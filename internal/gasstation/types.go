@@ -1,6 +1,9 @@
 package gasstation
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type fuelType string
 
@@ -19,8 +22,6 @@ type GasStation struct {
 	SimulationRunning  bool
 	SimulationComplete bool
 
-	DebugLogging bool
-
 	Lines   []*line
 	LinesWg sync.WaitGroup
 
@@ -35,6 +36,7 @@ type GasStation struct {
 type cashRegister struct {
 	ID    int
 	Queue chan *vehicle
+	Speed []time.Duration
 }
 
 type line struct {
@@ -42,11 +44,14 @@ type line struct {
 	Pumps            []*pump
 	PumpAvailability chan *pump
 	Queue            chan *vehicle
-	Wg               sync.WaitGroup
+	// Wait for all the pumps to be finished, only then is the line also finished
+	Wg sync.WaitGroup
 }
 
 type pump struct {
-	ID       fuelType
+	ID       string
+	Name     string
+	Speed    []time.Duration
 	Occupied bool
 }
 

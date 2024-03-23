@@ -1,0 +1,38 @@
+vehicle-spawner:
+  rate: [ 1ms,7ms ] # spawn rate in milliseconds
+  goal: 1000
+
+pumps:
+  # pump-id:
+  #   type: "electric | gas | diesel | hydrogen" (required)
+  #   amount: 1 (required)
+  #   speed: [1000, 5000] # random speed between 1-5s (single value or range) (required)
+  regular_charger:
+    name: Regular Charger
+    type: electric
+    amount: 1
+    speed: [20ms,50ms]
+  supercharger:
+    name: Supercharger
+    type: electric
+    amount: 1
+    speed: [ 10ms,25ms ]
+  regular_diesel:
+    name: Regular Diesel
+    type: diesel
+    amount: 2
+    speed: [5ms,10ms]
+  regular_gas:
+    name: Regular Gas
+    type: gas
+    amount: 2
+    speed: [5ms,10ms]
+  regular_lpg:
+    name: Regular LPG
+    type: lpg
+    amount: 1
+    speed: [5ms,10ms]
+
+registers:
+  amount: 2
+  speed: [10ms,30ms]

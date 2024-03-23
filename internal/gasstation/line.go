@@ -1,6 +1,10 @@
 package gasstation
 
-import "sync"
+import (
+	"github.com/Pzdrs/go-gas/internal/config"
+	"strconv"
+	"sync"
+)
 
 func (l *line) Handle(vehicle *vehicle, station *GasStation) {
 	claimedPump := false
@@ -51,53 +55,39 @@ func lineRoutine(line *line, station *GasStation) {
 	line.Wg.Wait()
 	//fmt.Println("All pumps are done at line", line.Type)
 }
+func constructLines(config map[string]config.PumpConfig) []*line {
+	var lines []*line
 
-func getLines() []*line {
-	return []*line{
-		{
-			Type: "gas",
-			Pumps: []*pump{
-				{ID: "gas0", Occupied: false},
-				{ID: "gas1", Occupied: false},
-				{ID: "gas2", Occupied: false},
-			},
-			PumpAvailability: make(chan *pump),
-			Queue:            make(chan *vehicle, 1000),
-			// Wait for all the pumps to be finished, only then is the line also finished
-			Wg: sync.WaitGroup{},
-		},
-		{
-			Type: "diesel",
-			Pumps: []*pump{
-				{ID: "diesel0", Occupied: false},
-				{ID: "diesel1", Occupied: false},
-				{ID: "diesel2", Occupied: false},
-			},
-			PumpAvailability: make(chan *pump),
-			Queue:            make(chan *vehicle, 1000),
-			// Wait for all the pumps to be finished, only then is the line also finished
-			Wg: sync.WaitGroup{},
-		},
-		{
-			Type: "electric",
-			Pumps: []*pump{
-				{ID: "electric0", Occupied: false},
-			},
-			PumpAvailability: make(chan *pump),
-			Queue:            make(chan *vehicle, 1000),
-			// Wait for all the pumps to be finished, only then is the line also finished
-			Wg: sync.WaitGroup{},
-		},
-		{
-			Type: "lpg",
-			Pumps: []*pump{
-				{ID: "lpg0", Occupied: false},
-				{ID: "lpg1", Occupied: false},
-			},
-			PumpAvailability: make(chan *pump),
-			Queue:            make(chan *vehicle, 1000),
-			// Wait for all the pumps to be finished, only then is the line also finished
-			Wg: sync.WaitGroup{},
-		},
+	for _, pumpConfig := range config {
+		if !lineTypeExists(lines, fuelType(pumpConfig.Type)) {
+			lines = append(lines, &line{
+				Type:             fuelType(pumpConfig.Type),
+				Pumps:            []*pump{},
+				PumpAvailability: make(chan *pump),
+				Queue:            make(chan *vehicle, 1000),
+				Wg:               sync.WaitGroup{},
+			})
+		}
+		for _, line := range lines {
+			if line.Type == fuelType(pumpConfig.Type) {
+				for i := 0; i < pumpConfig.Amount; i++ {
+					line.Pumps = append(line.Pumps, &pump{
+						ID:       pumpConfig.Type + strconv.Itoa(i),
+						Name:     pumpConfig.Name,
+						Speed:    pumpConfig.Speed,
+						Occupied: false,
+					})
+				}
+			}
+		}
 	}
+	return lines
+}
+func lineTypeExists(lines []*line, lineType fuelType) bool {
+	for _, line := range lines {
+		if line.Type == lineType {
+			return true
+		}
+	}
+	return false
 }

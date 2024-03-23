@@ -2,6 +2,7 @@ package gasstation
 
 import (
 	"fmt"
+	"github.com/Pzdrs/go-gas/internal/config"
 	"math/rand/v2"
 	"sync"
 	"time"
@@ -42,12 +43,14 @@ func (s *GasStation) Inspect() {
 	fmt.Println(" === GAS STATION DETAILS === ")
 	fmt.Println("Lines: ", len(s.Lines))
 	for i, line := range s.Lines {
-		fmt.Println(" - Line", i)
-		fmt.Println("   Type:", line.Type)
-		fmt.Println("   Pumps:", len(line.Pumps))
+		fmt.Println("Line", i, ":", line.Type)
+		for _, pump := range line.Pumps {
+			fmt.Printf(" - %s (%s)\n", pump.ID, pump.Name)
+		}
 	}
 
 	fmt.Println("Registers: ", len(s.Registers))
+	fmt.Println("=============================")
 }
 
 func (s *GasStation) Begin(vehicleGoal int) {
@@ -59,6 +62,7 @@ func (s *GasStation) Begin(vehicleGoal int) {
 	}
 	s.SimulationRunning = true
 
+	fmt.Println("Starting the simulation")
 	startTime := time.Now()
 
 	go s.spawnVehicles(vehicleGoal)
@@ -83,7 +87,7 @@ func (s *GasStation) Begin(vehicleGoal int) {
 	fmt.Println(vehiclesLeft)
 	fmt.Println(vehiclesPaid)
 	fmt.Println(vehiclesFilledUp)
-	fmt.Println("The simulation took: ", time.Since(startTime))
+	fmt.Println("The simulation took:", time.Since(startTime))
 
 	s.SimulationRunning = false
 	s.SimulationComplete = true
@@ -95,7 +99,6 @@ func (s *GasStation) spawnVehicles(goal int) {
 			Type: randomFuelType(),
 			ID:   i,
 		}
-		//fmt.Println("Spawned vehicle: ", vehicle.ID, " with fuel type: ", vehicle.Type)
 		for _, line := range s.Lines {
 			if vehicle.Type == line.Type {
 				//fmt.Println("Sending vehicle ", vehicle.ID, " to line: ", line.Type)
@@ -114,6 +117,7 @@ func (s *GasStation) exitHandler() {
 	for vehicle := range s.Exit {
 		_ = vehicle
 		s.CollectMetric(func() {
+			fmt.Println("increment")
 			vehiclesLeftMutex.Lock()
 			vehiclesLeft++
 			vehiclesLeftMutex.Unlock()
@@ -138,20 +142,11 @@ func (s *GasStation) closeExit() {
 	close(s.Exit)
 }
 
-func NewGasStation() *GasStation {
+func NewGasStation(configuration config.GasStationConfig) *GasStation {
 	return &GasStation{
-		Lines:   getLines(),
-		LinesWg: sync.WaitGroup{},
-		Registers: []*cashRegister{
-			{
-				ID:    1,
-				Queue: make(chan *vehicle, 1000),
-			},
-			{
-				ID:    2,
-				Queue: make(chan *vehicle, 1000),
-			},
-		},
+		Lines:       constructLines(config.GasStationConfiguration.Pumps),
+		LinesWg:     sync.WaitGroup{},
+		Registers:   constructRegisters(configuration.Registers),
 		RegistersWg: sync.WaitGroup{},
 		StatsWg:     sync.WaitGroup{},
 		Exit:        make(chan *vehicle),
@@ -160,4 +155,19 @@ func NewGasStation() *GasStation {
 
 func randomFuelType() fuelType {
 	return fuelTypes[rand.IntN(len(fuelTypes))]
+}
+func randomDuration(durationRange []time.Duration) time.Duration {
+	if len(durationRange) == 1 {
+		return durationRange[0]
+	}
+	if len(durationRange) != 2 {
+		panic("Invalid duration range")
+	}
+
+	speedMinNano := int64(durationRange[0])
+	speedMaxNano := int64(durationRange[1])
+
+	randomNano := speedMinNano + rand.Int64N(speedMaxNano-speedMinNano+1)
+
+	return time.Duration(randomNano)
 }
