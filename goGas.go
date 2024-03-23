@@ -11,5 +11,5 @@ func main() {
 
 	gasStation.Setup()
 
-	gasStation.Begin(1000)
+	gasStation.Begin(10000)
 }
