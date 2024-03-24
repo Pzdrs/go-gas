@@ -1,4 +1,4 @@
-package config
+package gasstation
 
 import (
 	"fmt"
@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-type GasStationConfig struct {
+type StationConfiguration struct {
 	VehicleSpawner VehicleSpawnerConfig  `yaml:"vehicle-spawner"`
 	Pumps          map[string]PumpConfig `yaml:"pumps"`
 	Registers      RegisterConfig        `yaml:"registers"`
 }
 
 type VehicleSpawnerConfig struct {
-	Goal int             `yaml:"goal"`
-	Rate []time.Duration `yaml:"rate"`
+	Goal  int             `yaml:"goal"`
+	Speed []time.Duration `yaml:"speed"`
 }
 
 type PumpConfig struct {
@@ -36,24 +36,12 @@ type InfluxConfig struct {
 	Bucket string `yaml:"influx.bucket"`
 }
 
-var GasStationConfiguration GasStationConfig
-var InfluxFluxConfiguration InfluxConfig
+func loadConfig(file string) StationConfiguration {
+	var config StationConfiguration
 
-func LoadConfig(file string) {
-	loadGasStationConfig(file)
-	loadInfluxConfig(file)
-}
-
-func loadInfluxConfig(file string) {
-	err := cleanenv.ReadConfig(file, &InfluxFluxConfiguration)
+	err := cleanenv.ReadConfig(file, &config)
 	if err != nil {
 		fmt.Println("Error reading configuration:", err)
 	}
-}
-
-func loadGasStationConfig(file string) {
-	err := cleanenv.ReadConfig(file, &GasStationConfiguration)
-	if err != nil {
-		fmt.Println("Error reading configuration:", err)
-	}
+	return config
 }

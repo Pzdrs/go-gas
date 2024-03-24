@@ -5,8 +5,8 @@ influx:
   bucket: go-gas
 
 vehicle-spawner:
-  rate: [ 0ms ] # spawn rate in milliseconds
-  goal: 1000
+  speed: [ 0ms ] # spawn rate in milliseconds
+  goal: 100000
 
 pumps:
   # pump-id:

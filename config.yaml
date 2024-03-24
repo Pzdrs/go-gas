@@ -1,5 +1,5 @@
 vehicle-spawner:
-  rate: [ 1ms,7ms ] # spawn rate in milliseconds
+  speed: [ 0ms ] # spawn rate in milliseconds
   goal: 1000
 
 pumps:

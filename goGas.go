@@ -1,18 +1,15 @@
 package main
 
 import (
-	"github.com/Pzdrs/go-gas/internal/config"
 	"github.com/Pzdrs/go-gas/internal/gasstation"
 )
 
 func main() {
-	config.LoadConfig("config.yaml")
-
-	gasStation := gasstation.NewGasStation(config.GasStationConfiguration)
+	gasStation := gasstation.NewGasStation("config.dev.yaml")
 
 	gasStation.Inspect()
 
 	gasStation.Setup()
 
-	gasStation.Begin(10)
+	gasStation.Begin()
 }

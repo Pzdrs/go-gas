@@ -1,7 +1,6 @@
 package gasstation
 
 import (
-	"github.com/Pzdrs/go-gas/internal/config"
 	"time"
 )
 
@@ -11,11 +10,12 @@ func (reg *cashRegister) Close() {
 
 func (reg *cashRegister) Serve(vehicle *vehicle, station *GasStation) {
 	//fmt.Println("Register ", reg.ID, "received vehicle: ", vehicle.ID)
-	duration := randomDuration(reg.Speed)
-
-	time.Sleep(duration)
+	time.Sleep(randomDuration(reg.Speed))
 	//fmt.Println("Register ", reg.ID, "is done processing vehicle: ", vehicle.ID)
 	station.Exit <- vehicle
+	if registersProgress != nil {
+		registersProgress.Add(1)
+	}
 }
 
 func registerRoutine(reg *cashRegister, station *GasStation) {
@@ -33,7 +33,7 @@ func leastBusyRegister(station *GasStation) *cashRegister {
 	}
 	return leastBusy
 }
-func constructRegisters(config config.RegisterConfig) []*cashRegister {
+func constructRegisters(config RegisterConfig) []*cashRegister {
 	registers := make([]*cashRegister, config.Amount)
 	for i := 0; i < config.Amount; i++ {
 		registers[i] = &cashRegister{

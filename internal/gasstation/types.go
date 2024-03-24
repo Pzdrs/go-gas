@@ -34,7 +34,7 @@ type GasStation struct {
 	Registers   []*cashRegister
 	RegistersWg sync.WaitGroup
 
-	StatsWg sync.WaitGroup
+	MetricsWg sync.WaitGroup
 
 	Exit chan *vehicle
 }

@@ -1,7 +1,6 @@
 package gasstation
 
 import (
-	"github.com/Pzdrs/go-gas/internal/config"
 	"strconv"
 	"sync"
 )
@@ -51,11 +50,12 @@ func lineRoutine(line *line, station *GasStation) {
 	for vehicle := range line.Queue {
 		line.Handle(vehicle, station)
 	}
+	linesProgress.Add(1)
 	//fmt.Println("line", line.Type, "is done and waiting for the pumps to finish")
 	line.Wg.Wait()
 	//fmt.Println("All pumps are done at line", line.Type)
 }
-func constructLines(config map[string]config.PumpConfig) []*line {
+func constructLines(config map[string]PumpConfig) []*line {
 	var lines []*line
 
 	for _, pumpConfig := range config {
