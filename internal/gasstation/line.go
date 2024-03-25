@@ -72,7 +72,7 @@ func constructLines(config map[string]PumpConfig) []*line {
 			if line.Type == fuelType(pumpConfig.Type) {
 				for i := 0; i < pumpConfig.Amount; i++ {
 					line.Pumps = append(line.Pumps, &pump{
-						ID:       pumpConfig.Type + strconv.Itoa(i),
+						ID:       pumpConfig.Type + strconv.Itoa(len(line.Pumps)),
 						Name:     pumpConfig.Name,
 						Speed:    pumpConfig.Speed,
 						Occupied: false,
