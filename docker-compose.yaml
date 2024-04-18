@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  go-gas:
+    container_name: gas-station
+    build:
+      context: .
+    depends_on:
+      - prometheus
+      - push-gateway
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+
+  push-gateway:
+    image: prom/pushgateway
+    depends_on: [ prometheus ]

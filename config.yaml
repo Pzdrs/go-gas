@@ -3,7 +3,7 @@ vehicle-spawner:
   goal: 1000
 
 prometheus:
-  push-gateway: "http://localhost:9091"
+  push-gateway: "http://push-gateway:9091"
 
 pumps:
   # pump-id:
