@@ -8,6 +8,7 @@ import (
 func (l *line) Handle(vehicle *vehicle, station *GasStation) {
 	claimedPump := false
 	//fmt.Println("line ", l.Type, "received vehicle: ", vehicle.ID)
+	vehicle.setWaitingForPump()
 
 findPump:
 	if !l.hasUnoccupiedPumps() {
@@ -21,6 +22,7 @@ findPump:
 		if !pump.Occupied {
 			claimedPump = true
 			//fmt.Println("vehicle ", vehicle.ID, "found a free pump: ", pump.ID)
+			vehicle.setDoneWaitingForPump(station)
 			pump.Occupied = true
 			l.Wg.Add(1)
 			go pumpRoutine(l, pump, vehicle, station)

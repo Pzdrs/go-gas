@@ -8,6 +8,9 @@ vehicle-spawner:
   speed: [ 0ms ] # spawn rate in milliseconds
   goal: 100000
 
+prometheus:
+  push-gateway: "http://localhost:9091"
+
 pumps:
   # pump-id:
   #   type: "electric | gas | diesel | hydrogen" (required)
@@ -17,7 +20,7 @@ pumps:
     name: Regular Charger
     type: electric
     amount: 1
-    speed: [0ms]
+    speed: [ 0ms ]
   supercharger:
     name: Supercharger
     type: electric
@@ -27,18 +30,18 @@ pumps:
     name: Regular Diesel
     type: diesel
     amount: 2
-    speed: [0ms]
+    speed: [ 0ms ]
   regular_gas:
     name: Regular Gas
     type: gas
     amount: 2
-    speed: [0ms]
+    speed: [ 0ms ]
   regular_lpg:
     name: Regular LPG
     type: lpg
     amount: 1
-    speed: [0ms]
+    speed: [ 0ms ]
 
 registers:
   amount: 2
-  speed: [0ms]
+  speed: [ 0ms ]

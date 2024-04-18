@@ -3,7 +3,6 @@ package gasstation
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"github.com/schollz/progressbar/v3"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -14,15 +13,6 @@ import (
 
 var configuration StationConfiguration
 var vehicleSpawnerProgress, registersProgress, linesProgress, metricsProgress *progressbar.ProgressBar
-
-func (s *GasStation) CollectMetric(getDataPoint func() *write.Point) {
-	s.MetricsWg.Add(1)
-	go func() {
-		defer s.MetricsWg.Done()
-
-		fmt.Println("Metric written")
-	}()
-}
 
 func (s *GasStation) Setup() {
 	go s.exitHandler()
@@ -73,10 +63,18 @@ func (s *GasStation) Begin() {
 	// All vehicles are fueled up and paid up and heading out => no more vehicles will be coming through the exit
 	s.closeExit()
 
+	simulationTime := time.Since(startTime)
+
+	s.logMetric(func() {
+		s.Metrics.simulationTime.Set(float64(simulationTime.Milliseconds()))
+	})
+
+	s.pushMetrics()
 	s.awaitMetrics()
 
 	p := message.NewPrinter(language.English)
-	p.Printf(">> Done simulating %d vehicles. Took: %s <<\n", configuration.VehicleSpawner.Goal, time.Since(startTime))
+
+	p.Printf(">> Done simulating %d vehicles. Took: %s <<\n", configuration.VehicleSpawner.Goal, simulationTime)
 
 	s.SimulationRunning = false
 	s.SimulationComplete = true
@@ -134,7 +132,9 @@ func (s *GasStation) awaitMetrics() {
 func (s *GasStation) exitHandler() {
 	for vehicle := range s.Exit {
 		_ = vehicle
-		//fmt.Println(" --- vehicle ", vehicle.ID, "is leaving the gas station")
+		s.logMetric(func() {
+			s.Metrics.carsProcessedTotal.Inc()
+		})
 	}
 }
 
@@ -156,8 +156,10 @@ func (s *GasStation) closeExit() {
 
 func NewGasStation(configFile string) *GasStation {
 	configuration = loadConfig(configFile)
+
 	return &GasStation{
 		SimulationID: uuid.New(),
+		Metrics:      *registerMetrics(),
 		Lines:        constructLines(configuration.Pumps),
 		LinesWg:      sync.WaitGroup{},
 		Registers:    constructRegisters(configuration.Registers),

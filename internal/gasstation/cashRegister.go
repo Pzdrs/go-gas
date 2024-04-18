@@ -1,6 +1,8 @@
 package gasstation
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
+	"strconv"
 	"time"
 )
 
@@ -10,7 +12,13 @@ func (reg *cashRegister) Close() {
 
 func (reg *cashRegister) Serve(vehicle *vehicle, station *GasStation) {
 	//fmt.Println("Register ", reg.ID, "received vehicle: ", vehicle.ID)
-	time.Sleep(randomDuration(reg.Speed))
+	vehicle.setDoneWaitingForRegister(station)
+
+	duration := randomDuration(reg.Speed)
+	time.Sleep(duration)
+	station.logMetric(func() {
+		station.Metrics.registerTime.With(prometheus.Labels{"register": strconv.Itoa(reg.ID)}).Observe(float64(duration.Milliseconds()))
+	})
 	//fmt.Println("Register ", reg.ID, "is done processing vehicle: ", vehicle.ID)
 	station.Exit <- vehicle
 	if registersProgress != nil {

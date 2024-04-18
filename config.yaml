@@ -2,6 +2,9 @@ vehicle-spawner:
   speed: [ 0ms ] # spawn rate in milliseconds
   goal: 1000
 
+prometheus:
+  push-gateway: "http://localhost:9091"
+
 pumps:
   # pump-id:
   #   type: "electric | gas | diesel | hydrogen" (required)

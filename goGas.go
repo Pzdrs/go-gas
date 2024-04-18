@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	gasStation := gasstation.NewGasStation("config.dev.yaml")
+	gasStation := gasstation.NewGasStation("config.yaml")
 
 	gasStation.Inspect()
 

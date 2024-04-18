@@ -7,9 +7,10 @@ import (
 )
 
 type StationConfiguration struct {
-	VehicleSpawner VehicleSpawnerConfig  `yaml:"vehicle-spawner"`
-	Pumps          map[string]PumpConfig `yaml:"pumps"`
-	Registers      RegisterConfig        `yaml:"registers"`
+	VehicleSpawner   VehicleSpawnerConfig  `yaml:"vehicle-spawner"`
+	PrometheusConfig PrometheusConfig      `yaml:"prometheus"`
+	Pumps            map[string]PumpConfig `yaml:"pumps"`
+	Registers        RegisterConfig        `yaml:"registers"`
 }
 
 type VehicleSpawnerConfig struct {
@@ -29,11 +30,8 @@ type RegisterConfig struct {
 	Speed  []time.Duration `yaml:"speed"`
 }
 
-type InfluxConfig struct {
-	Url    string `yaml:"influx.url"`
-	Token  string `yaml:"influx.token"`
-	Org    string `yaml:"influx.org"`
-	Bucket string `yaml:"influx.bucket"`
+type PrometheusConfig struct {
+	PushGateway string `yaml:"push-gateway"`
 }
 
 func loadConfig(file string) StationConfiguration {
